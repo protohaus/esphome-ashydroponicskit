@@ -38,7 +38,7 @@ esphome:
             id(${device_name}_ph_enable_sending_values).turn_on();
           else
             id(${device_name}_ph_enable_sending_values).turn_off();
-
+    
 sensor:
 
   # SENSOR DEFINITION
@@ -117,7 +117,7 @@ switch:
     id: ${device_name}_ph_enable
     name: ${device_name_upper}.ph.enable
     lambda: |-
-      return id(${device_name}_ph).sensor_enabled();
+      return id(ph_enabled);
     turn_on_action:
       - lambda: |-
           id(${device_name}_ph).enable_sensor();

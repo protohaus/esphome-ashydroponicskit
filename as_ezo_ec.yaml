@@ -119,7 +119,7 @@ switch:
     id: ${device_name}_ec_enable
     name: ${device_name_upper}.ec.enable
     lambda: |-
-      return id(${device_name}_ec).sensor_enabled();
+      return id(ec_enabled);
     turn_on_action:
       - lambda: |-
           id(${device_name}_ec).enable_sensor();

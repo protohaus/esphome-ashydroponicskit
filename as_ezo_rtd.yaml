@@ -82,7 +82,7 @@ switch:
     id: ${device_name}_rtd_enable
     name: ${device_name_upper}.rtd.enable
     lambda: |-
-      return id(${device_name}_rtd).sensor_enabled();
+      return id(rtd_enabled);
     turn_on_action:
       - lambda: |-
           id(${device_name}_rtd).enable_sensor();
