@@ -97,8 +97,8 @@ switch:
           id: rtd_enabled
           value: "false"
       - output.turn_off: ${device_name}_rtd_enable_pin 
-      - switch.turn_off: ${device_name}_ec_enable
-      - switch.turn_off: ${device_name}_ph_enable
+      #- switch.turn_off: ${device_name}_ec_enable
+      #- switch.turn_off: ${device_name}_ph_enable
    
 
   # ENABLE / DISABLE VALUE SENDING
