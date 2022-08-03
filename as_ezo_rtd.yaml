@@ -16,18 +16,23 @@ esphome:
           /***************************************************************
           * enable/disable sensors depending on last boot sensor states
           ***************************************************************/
-          if(id(rtd_enabled))
-            id(${device_name}_rtd_enable).turn_on();
-          else
-            id(${device_name}_rtd_enable).turn_off();
+          
+          //always on, since turning off leads to problems with i2c communication sometimes
+          //id(${device_name}_rtd_enable_pin).turn_on();
+          id(${device_name}_rtd_enable).turn_on();
+          //
+          //if(id(rtd_enabled))
+          //  id(${device_name}_rtd_enable).turn_on();
+          //else
+          //  id(${device_name}_rtd_enable).turn_off();
             
           /***************************************************************
           * enable/disable value sending
           ***************************************************************/  
-          if(id(rtd_sending_enabled))
-            id(${device_name}_rtd_enable_sending_values).turn_on();
+          if(id(rtd_reading_enabled))
+            id(${device_name}_rtd_enable_reading_values).turn_on();
           else
-            id(${device_name}_rtd_enable_sending_values).turn_off();
+            id(${device_name}_rtd_enable_reading_values).turn_off();
 
 sensor:
 
@@ -49,7 +54,7 @@ globals:
      restore_value: yes
      initial_value: 'true'
 
-   - id: rtd_sending_enabled
+   - id: rtd_reading_enabled
      type: bool
      restore_value: yes
      initial_value: 'true'
@@ -77,10 +82,11 @@ switch:
           id(${device_name}_rtd).deactivate_calibration();
     internal: ${entities_internal}
     
-  # ENABLE/DISABLE SENSOR
+  # ENABLE/DISABLE SENSOR (removed because this lead to some problems)
   - platform: template
     id: ${device_name}_rtd_enable
     name: ${device_name_upper}.rtd.enable
+    internal: "true"
     lambda: |-
       return id(rtd_enabled);
     turn_on_action:
@@ -103,18 +109,18 @@ switch:
 
   # ENABLE / DISABLE VALUE SENDING
   - platform: template
-    id: ${device_name}_rtd_enable_sending_values
-    name: ${device_name_upper}.rtd.enable_sending_values
+    id: ${device_name}_rtd_enable_reading_values
+    name: ${device_name_upper}.rtd.enable_reading_values
     lambda: |-
       return id(${device_name}_rtd).sending_values();
     turn_on_action:
       - lambda: |-
           id(${device_name}_rtd).enable_sending_values();
-          id(rtd_sending_enabled) = true;
+          id(rtd_reading_enabled) = true;
     turn_off_action:
       - lambda: |-
           id(${device_name}_rtd).disable_sending_values();
-          id(rtd_sending_enabled) = false;
+          id(rtd_reading_enabled) = false;
     
 button:
 
@@ -192,24 +198,24 @@ number:
 binary_sensor:
 
   # ERROR CHECKING SENSOR    
-  - platform: template
-    name: "${device_name_upper}.rtd.error"
-    id: ${device_name}_rtd_error
-    lambda: |-
-      if (id(${device_name}_rtd).retry_counter() >= ${max_retry_attempts})
-      {
-         return true;
-      }else
-      {
-        return false;
-      }
-    on_press:
-      then:
-        if:
-          condition:
-            lambda: |-
-              return id(rtd_enabled);
-          then:
-            - switch.turn_off: ${device_name}_rtd_enable
-            - delay: 2s
-            - switch.turn_on: ${device_name}_rtd_enable
+  #- platform: template
+  #  name: "${device_name_upper}.rtd.error"
+  #  id: ${device_name}_rtd_error
+  #  lambda: |-
+  #    if (id(${device_name}_rtd).retry_counter() >= ${max_retry_attempts})
+  #    {
+  #       return true;
+  #    }else
+  #    {
+  #      return false;
+  #    }
+  #  on_press:
+  #    then:
+  #      if:
+  #        condition:
+  #          lambda: |-
+  #            return id(rtd_enabled);
+  #        then:
+  #         # - switch.turn_off: ${device_name}_rtd_enable
+  #         # - delay: 2s
+  #         # - switch.turn_on: ${device_name}_rtd_enable

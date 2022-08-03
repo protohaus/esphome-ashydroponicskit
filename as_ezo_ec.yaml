@@ -17,10 +17,15 @@ esphome:
           /***************************************************************
           * enable/disable sensors depending on last boot sensor states
           ***************************************************************/
-          if(id(ec_enabled))
-            id(${device_name}_ec_enable).turn_on();
-          else
-            id(${device_name}_ec_enable).turn_off(); 
+          
+          //always on, since turning off leads to problems with i2c communication sometimes
+          //id(${device_name}_ec_enable_pin).turn_off();
+          id(${device_name}_ec_enable).turn_on();
+          
+          //if(id(ec_enabled))
+          //  id(${device_name}_ec_enable).turn_on();
+          //else
+          //  id(${device_name}_ec_enable).turn_off(); 
             
           /***************************************************************
           * enable/disable temp compensation depending on last boot states
@@ -34,10 +39,10 @@ esphome:
           * enable/disable value sending
           ***************************************************************/  
           
-          if(id(ec_sending_enabled))
-            id(${device_name}_ec_enable_sending_values).turn_on();
+          if(id(ec_reading_enabled))
+            id(${device_name}_ec_enable_reading_values).turn_on();
           else
-            id(${device_name}_ec_enable_sending_values).turn_off();
+            id(${device_name}_ec_enable_reading_values).turn_off();
 
 sensor:
 
@@ -59,7 +64,7 @@ globals:
      restore_value: yes
      initial_value: 'true'
    
-   - id: ec_sending_enabled
+   - id: ec_reading_enabled
      type: bool
      restore_value: yes
      initial_value: 'true'
@@ -118,6 +123,7 @@ switch:
   - platform: template
     id: ${device_name}_ec_enable
     name: ${device_name_upper}.ec.enable
+    internal: "true"
     lambda: |-
       return id(ec_enabled);
     turn_on_action:
@@ -138,18 +144,18 @@ switch:
 
   # ENABLE / DISABLE VALUE SENDING
   - platform: template
-    id: ${device_name}_ec_enable_sending_values
-    name: ${device_name_upper}.ec.enable_sending_values
+    id: ${device_name}_ec_enable_reading_values
+    name: ${device_name_upper}.ec.enable_reading_values
     lambda: |-
       return id(${device_name}_ec).sending_values();
     turn_on_action:
       - lambda: |-
           id(${device_name}_ec).enable_sending_values();
-          id(ec_sending_enabled) = true;
+          id(ec_reading_enabled) = true;
     turn_off_action:
       - lambda: |-
           id(${device_name}_ec).disable_sending_values();
-          id(ec_sending_enabled) = false;
+          id(ec_reading_enabled) = false;
 
 button:
 
@@ -332,27 +338,27 @@ number:
 binary_sensor:
 
   # ERROR CHECKING SENSOR
-  - platform: template
-    name: "${device_name_upper}.ec.error"
-    id: ${device_name}_ec_error
-    lambda: |-
-      if (id(${device_name}_ec).retry_counter() >= ${max_retry_attempts})
-      {
-         return true;
-      }else
-      {
-        return false;
-      }
-    on_press:
-      then:
-        if:
-          condition:
-            lambda: |-
-              return id(rtd_enabled);
-          then:
-            - switch.turn_off: ${device_name}_ec_enable
-            - delay: 2s
-            - switch.turn_on: ${device_name}_ec_enable
+  #- platform: template
+  #  name: "${device_name_upper}.ec.error"
+  #  id: ${device_name}_ec_error
+  #  lambda: |-
+  #    if (id(${device_name}_ec).retry_counter() >= ${max_retry_attempts})
+  #    {
+  #       return true;
+  #    }else
+  #    {
+  #      return false;
+  #    }
+  #  on_press:
+  #    then:
+  #      if:
+  #        condition:
+  #          lambda: |-
+  #            return id(rtd_enabled);
+  #        then:
+  #          - switch.turn_off: ${device_name}_ec_enable
+  #          - delay: 2s
+  #          - switch.turn_on: ${device_name}_ec_enable
     
 interval:
 

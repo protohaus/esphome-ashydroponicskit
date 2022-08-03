@@ -17,10 +17,15 @@ esphome:
           /***************************************************************
           * enable/disable sensors depending on last boot sensor states
           ***************************************************************/
-          if(id(ph_enabled))
-            id(${device_name}_ph_enable).turn_on();
-          else
-            id(${device_name}_ph_enable).turn_off();
+          
+          //always on, since turning off leads to problems with i2c communication sometimes
+          //id(${device_name}_ph_enable_pin).turn_off();
+          id(${device_name}_ph_enable).turn_on();
+          
+          //if(id(ph_enabled))
+          //  id(${device_name}_ph_enable).turn_on();
+          //else
+          //  id(${device_name}_ph_enable).turn_off();
           
             
           /***************************************************************
@@ -34,10 +39,10 @@ esphome:
           /***************************************************************
           * enable/disable value sending
           ***************************************************************/  
-          if(id(ph_sending_enabled))
-            id(${device_name}_ph_enable_sending_values).turn_on();
+          if(id(ph_reading_enabled))
+            id(${device_name}_ph_enable_reading_values).turn_on();
           else
-            id(${device_name}_ph_enable_sending_values).turn_off();
+            id(${device_name}_ph_enable_reading_values).turn_off();
     
 sensor:
 
@@ -59,7 +64,7 @@ globals:
      restore_value: yes
      initial_value: 'true'
    
-   - id: ph_sending_enabled
+   - id: ph_reading_enabled
      type: bool
      restore_value: yes
      initial_value: 'true'
@@ -116,6 +121,7 @@ switch:
   - platform: template
     id: ${device_name}_ph_enable
     name: ${device_name_upper}.ph.enable
+    internal: "true"
     lambda: |-
       return id(ph_enabled);
     turn_on_action:
@@ -136,18 +142,18 @@ switch:
 
   # ENABLE / DISABLE VALUE SENDING      
   - platform: template
-    id: ${device_name}_ph_enable_sending_values
-    name: ${device_name_upper}.ph.enable_sending_values
+    id: ${device_name}_ph_enable_reading_values
+    name: ${device_name_upper}.ph.enable_reading_values
     lambda: |-
       return id(${device_name}_ph).sending_values();
     turn_on_action:
       - lambda: |-
           id(${device_name}_ph).enable_sending_values();
-          id(ph_sending_enabled) = true;
+          id(ph_reading_enabled) = true;
     turn_off_action:
       - lambda: |-
           id(${device_name}_ph).disable_sending_values();
-          id(ph_sending_enabled) = false;
+          id(ph_reading_enabled) = false;
     
 button:
   
@@ -289,27 +295,27 @@ number:
 binary_sensor:
 
   # ERROR CHECKING SENSOR           
-  - platform: template
-    name: "${device_name_upper}.ph.error"
-    id: ${device_name}_ph_error
-    lambda: |-
-      if (id(${device_name}_ph).retry_counter() >= ${max_retry_attempts})
-      {
-         return true;
-      }else
-      {
-        return false;
-      }
-    on_press:
-      then:
-        if:
-          condition:
-            lambda: |-
-              return id(rtd_enabled);
-          then:
-            - switch.turn_off: ${device_name}_ph_enable
-            - delay: 2s
-            - switch.turn_on: ${device_name}_ph_enable
+  #- platform: template
+  #  name: "${device_name_upper}.ph.error"
+  #  id: ${device_name}_ph_error
+  #  lambda: |-
+  #    if (id(${device_name}_ph).retry_counter() >= ${max_retry_attempts})
+  #    {
+  #       return true;
+  #    }else
+  #    {
+  #      return false;
+  #    }
+  #  on_press:
+  #    then:
+  #      if:
+  #        condition:
+  #          lambda: |-
+  #            return id(rtd_enabled);
+  #        then:
+  #          - switch.turn_off: ${device_name}_ph_enable
+  #          - delay: 2s
+  #          - switch.turn_on: ${device_name}_ph_enable
     
 interval:
 
