@@ -3,21 +3,63 @@ packages:
   as_hydroponics_kit_as_ezo_ph: !include as_ezo_mqtt_sender_ph.yaml
   as_hydroponics_kit_as_ezo_rtd: !include as_ezo_mqtt_sender_rtd.yaml
 
-button:
 
-  # ENABLE/DISABLE ALL SENSORS
-  #- platform: template
-  #  name: ${device_name_upper}.all.enable_mqtt
-  #  id: ${device_name}_all_enable_mqtt
-  #  on_press:
-  #    - switch.turn_on: ${device_name}_ec_mqtt
-  #    - switch.turn_on: ${device_name}_ph_mqtt
-  #    - switch.turn_on: ${device_name}_rtd_mqtt
-  #
-  #- platform: template
-  #  name: ${device_name_upper}.all.disable_mqtt
-  #  id: ${device_name}_all_disable_mqtt
-  #  on_press:
-  #    - switch.turn_off: ${device_name}_ec_mqtt
-  #    - switch.turn_off: ${device_name}_ph_mqtt
-  #    - switch.turn_off: ${device_name}_rtd_mqtt
+globals:
+  - id: combined_mqtt_timestamp_0
+    type: int
+    restore_value: no
+    initial_value: '0' 
+  
+  - id: combined_mqtt_enabled
+    type: bool
+    restore_value: yes
+    initial_value: ${mqtt_combined_enabled}
+
+switch:
+  
+  # TEMPERATURE COMPENSATION
+  - platform: template
+    name: ${device_name_upper}.combined.mqtt
+    id: ${device_name}_combined_mqtt
+    lambda: |-
+      return id(combined_mqtt_enabled);
+    turn_on_action:
+      - lambda: |-
+          id(combined_mqtt_enabled) = true;
+          id(combined_mqtt_timestamp_0) = millis();
+    turn_off_action:
+      - lambda: |-
+          id(combined_mqtt_enabled) = false;
+    internal: ${mqtt_entities_internal}
+    
+
+interval:
+  - interval: 1s
+    then:    
+     lambda: |-
+       if(!${mqtt_entities_internal})
+       {
+         if (id(combined_mqtt_enabled))
+         {
+           int time_now = millis();
+           // integer overflow protection -> restart waiting timer -> (TODO: maybe implement exact value reset via max integer)
+           if (time_now < id(combined_mqtt_timestamp_0))
+           	id(combined_mqtt_timestamp_0) = time_now;
+           
+           // check if we should send a sample
+           if (time_now - id(combined_mqtt_timestamp_0) >= id(${device_name}_ec_mqtt_sample_interval).state)
+           {
+             id(${device_name}_mqtt_client).publish_json("${host_name}/json", [=](JsonObject root) 
+             {
+               root["ph"]["v"] = id(${device_name}_ph).state;
+               root["ph"]["u"] = "";
+               root["ec"]["v"] = id(${device_name}_ec).state;
+               root["ec"]["u"] = "µS/cm";
+               root["rtd"]["v"] = id(${device_name}_rtd).state;
+               root["rtd"]["u"] = "°C";
+             });
+             //id(${device_name}_mqtt_client).publish("${host_name}/ec", id(${device_name}_ec).state);
+             id(combined_mqtt_timestamp_0) = time_now;
+           }
+         }
+       }
