@@ -40,10 +40,58 @@ switch:
       - lambda: |-
           id(ec_mqtt_enabled) = false;
     internal: ${mqtt_entities_internal}
+    on_turn_on:
+      then:
+        - mqtt.publish:
+            topic: some/topic
+            payload: "Something happened!"
+      
+        # Templated:
+        - mqtt.publish:
+            topic: !lambda |-
+              if (id(${device_name}_ec_mqtt).state) return "topic1";
+              else return "topic2";
+            payload: !lambda |-
+              return id(${device_name}_ec_mqtt).state ? "YES" : "NO";
           
 interval:
-  - interval: 5s
-    then:    
+  - interval: 1s
+    then:       
+    #  - if:
+    #      condition:
+    #        lambda: |-
+    #          return !${mqtt_entities_internal};
+    #      then:
+    #        - if:
+    #            condition:
+    #              lambda: |-
+    #                return id(ec_mqtt_enabled);
+    #            then:
+    #              - if:
+    #                  condition:
+    #                    lambda: |-
+    #                      int time_now = millis();
+    #                      // integer overflow protection -> restart waiting timer -> (TODO: maybe implement exact value reset via max integer)
+    #                      if (time_now < id(ec_mqtt_timestamp_0))
+    #                      	id(ec_mqtt_timestamp_0) = time_now;
+    #                      
+    #                      // check if we should send a sample
+    #                      if (time_now - id(ec_mqtt_timestamp_0) >= id(${device_name}_ec_mqtt_sample_interval).state)
+    #                        return true;
+    #                      else
+    #                        return false;
+    #                  then:
+    #                    - mqtt.publish:
+    #                        topic: !lambda |-
+    #                          return "${host_name}/ec";
+    #                        payload: !lambda |-
+    #                          return to_string(id(${device_name}_ec).state);
+    #                          
+    #                  else:
+    #            else:
+    #      else:
+      
+      
      lambda: |-
        if(!${mqtt_entities_internal})
        {
@@ -57,11 +105,8 @@ interval:
            // check if we should send a sample
            if (time_now - id(ec_mqtt_timestamp_0) >= id(${device_name}_ec_mqtt_sample_interval).state)
            {
-             id(${device_name}_mqtt_client).publish_json("${host_name}/ec", [=](JsonObject root) 
-             {
-               root["ec"] = id(${device_name}_ec).state;
-             });
-             //id(${device_name}_mqtt_client).publish("${host_name}/ec", id(${device_name}_ec).state);
+             id(${device_name}_mqtt_client).publish("sensor/${host_name}/ec", to_string(id(${device_name}_ec).state));
+             
              id(ec_mqtt_timestamp_0) = time_now;
            }
          }

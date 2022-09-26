@@ -15,6 +15,21 @@ globals:
     restore_value: yes
     initial_value: ${mqtt_combined_enabled}
 
+number: 
+  - platform: template
+    min_value: ${min_mqtt_interval_combined}
+    max_value: ${max_mqtt_interval_combined}
+    step: "1"
+    id: ${device_name}_combined_mqtt_sample_interval
+    name: ${device_name}.combined.mqtt.sample_interval
+    optimistic: true
+    mode: box
+    restore_value : true
+    initial_value: ${min_mqtt_interval_combined}
+    update_interval: "10s"
+    unit_of_measurement: "ms"
+    internal: ${mqtt_entities_internal}
+    
 switch:
   
   # TEMPERATURE COMPENSATION
@@ -47,9 +62,9 @@ interval:
            	id(combined_mqtt_timestamp_0) = time_now;
            
            // check if we should send a sample
-           if (time_now - id(combined_mqtt_timestamp_0) >= id(${device_name}_ec_mqtt_sample_interval).state)
+           if (time_now - id(combined_mqtt_timestamp_0) >= id(${device_name}_combined_mqtt_sample_interval).state)
            {
-             id(${device_name}_mqtt_client).publish_json("${host_name}/json", [=](JsonObject root) 
+             id(${device_name}_mqtt_client).publish_json("sensor/${host_name}/json", [=](JsonObject root) 
              {
                root["ph"]["v"] = id(${device_name}_ph).state;
                root["ph"]["u"] = "";
@@ -58,7 +73,6 @@ interval:
                root["rtd"]["v"] = id(${device_name}_rtd).state;
                root["rtd"]["u"] = "°C";
              });
-             //id(${device_name}_mqtt_client).publish("${host_name}/ec", id(${device_name}_ec).state);
              id(combined_mqtt_timestamp_0) = time_now;
            }
          }

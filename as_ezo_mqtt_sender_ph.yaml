@@ -42,7 +42,7 @@ switch:
     internal: ${mqtt_entities_internal}
           
 interval:
-  - interval: 5s
+  - interval: 1s
     then:    
       lambda: |-
         if(!${mqtt_entities_internal})
@@ -57,11 +57,7 @@ interval:
             // check if we should send a sample
             if (time_now - id(ph_mqtt_timestamp_0) >= id(${device_name}_ph_mqtt_sample_interval).state)
             {
-              id(${device_name}_mqtt_client).publish_json("${host_name}/ph", [=](JsonObject root) 
-              {
-                root["ph"] = id(${device_name}_ph).state;
-              });
-              //id(${device_name}_mqtt_client).publish("${host_name}/ph", id(${device_name}_ph).state);
+              id(${device_name}_mqtt_client).publish("sensor/${host_name}/ph", to_string(id(${device_name}_ph).state));
               
               id(ph_mqtt_timestamp_0) = time_now;
             }

@@ -26,7 +26,6 @@ number:
     
 switch:
   
-  # TEMPERATURE COMPENSATION
   - platform: template
     name: ${device_name_upper}.rtd.mqtt
     id: ${device_name}_rtd_mqtt
@@ -42,7 +41,7 @@ switch:
     internal: ${mqtt_entities_internal}
           
 interval:
-  - interval: 5s
+  - interval: 1s
     then:    
      lambda: |-
        if(!${mqtt_entities_internal})
@@ -57,11 +56,8 @@ interval:
            // check if we should send a sample
            if (time_now - id(rtd_mqtt_timestamp_0) >= id(${device_name}_rtd_mqtt_sample_interval).state)
            {
-             id(${device_name}_mqtt_client).publish_json("${host_name}/rtd", [=](JsonObject root) 
-             {
-               root["rtd"] = id(${device_name}_rtd).state;
-             });
-             //id(${device_name}_mqtt_client).publish("${host_name}/rtd", id(${device_name}_rtd).state);
+             id(${device_name}_mqtt_client).publish("sensor/${host_name}/rtd", to_string(id(${device_name}_rtd).state));
+             
              id(rtd_mqtt_timestamp_0) = time_now;
            }
          }
