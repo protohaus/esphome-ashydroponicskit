@@ -66,12 +66,20 @@ interval:
            {
              id(${device_name}_mqtt_client).publish_json("sensor/${host_name}/json", [=](JsonObject root) 
              {
-               root["ph"]["v"] = id(${device_name}_ph).state;
+               //root["ph"]["v"] = id(${device_name}_ph).state;
+               //root["ph"]["u"] = "";
+               //root["ec"]["v"] = id(${device_name}_ec).state;
+               //root["ec"]["u"] = "µS/cm";
+               //root["rtd"]["v"] = id(${device_name}_rtd).state;
+               //root["rtd"]["u"] = "°C";
+               
+               root["ph"]["v"] = to_string(id(${device_name}_ph).state);
                root["ph"]["u"] = "";
-               root["ec"]["v"] = id(${device_name}_ec).state;
+               root["ec"]["v"] = to_string(id(${device_name}_ec).state);
                root["ec"]["u"] = "µS/cm";
-               root["rtd"]["v"] = id(${device_name}_rtd).state;
+               root["rtd"]["v"] = to_string(id(${device_name}_rtd).state);
                root["rtd"]["u"] = "°C";
+               
              });
              id(combined_mqtt_timestamp_0) = time_now;
            }
