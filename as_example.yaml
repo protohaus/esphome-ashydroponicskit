@@ -8,6 +8,9 @@ substitutions:
   settings_log_level: DEBUG
   settings_flash_write_interval: 1min
   
+  # MQTT Settings
+  mqtt_discovery: "false"
+  
   #I2C Bus
   i2c_bus_a_name: i2c_bus_a
   i2c_bus_a_sda: GPIO23
@@ -25,36 +28,56 @@ substitutions:
   enable_ec_pin: GPIO12
   enable_ph_pin: GPIO13
   
-  # EZO sample intervals
-  min_sample_interval_ec: "2000" # 1s
-  max_sample_interval_ec: "10000" # 60min
-  
-  min_sample_interval_ph: "2000" # 1s
-  max_sample_interval_ph: "10000" # 60min
-  
-  min_sample_interval_rtd: "1000" # 1s
-  max_sample_interval_rtd: "10000" # 60min
-  
-  min_sample_interval_ec_tempcomp: "10000" 
-  max_sample_interval_ec_tempcomp: "60000"
-  
-  min_sample_interval_ph_tempcomp: "10000" 
-  max_sample_interval_ph_tempcomp: "60000"
-  
-  min_mqtt_interval_ec: "1000"
-  max_mqtt_interval_ec: "3600000"
-  
-  min_mqtt_interval_ph: "1000"
-  max_mqtt_interval_ph: "3600000"
-  
-  min_mqtt_interval_rtd: "1000"
-  max_mqtt_interval_rtd: "3600000"
-  
   entities_internal: "false"
   
+  # EZO sample intervals
+  min_sample_interval_ec: "1000" # 1s
+  initial_sample_interval_ec: "1000" # 1s
+  max_sample_interval_ec: "60000" # 1min
+  sliding_window_size_ec: "10"
+  sliding_window_send_every_ec: "5"
+    
+  min_sample_interval_ph: "1000" # 1s
+  initial_sample_interval_ph: "1000" # 1s
+  max_sample_interval_ph: "60000" # 1min
+  sliding_window_size_ph: "10"
+  sliding_window_send_every_ph: "5"
+  
+  min_sample_interval_rtd: "1000" # 1s
+  initial_sample_interval_rtd: "1000" # 1s
+  max_sample_interval_rtd: "60000" # 1min
+  sliding_window_size_rtd: "10"
+  sliding_window_send_every_rtd: "5"
+  
+  min_sample_interval_ec_tempcomp: "10000" #1min
+  initial_sample_interval_ec_tempcomp: "10000" #1min
+  max_sample_interval_ec_tempcomp: "3600000" #1h
+  
+  min_sample_interval_ph_tempcomp: "10000" #1min 
+  initial_sample_interval_ph_tempcomp: "10000" #1min 
+  max_sample_interval_ph_tempcomp: "3600000" #1h
+  
+  # MQTT sample intervals
+  min_mqtt_interval_ec: "6000" # 1s
+  initial_mqtt_interval_ec: "6000" # 1s
+  max_mqtt_interval_ec: "3600000" #1h
+  
+  min_mqtt_interval_ph: "6000" # 1s
+  initial_mqtt_interval_ph: "6000" # 1s
+  max_mqtt_interval_ph: "3600000" #1h
+  
+  min_mqtt_interval_rtd: "6000" # 1s
+  initial_mqtt_interval_rtd: "6000" # 1s
+  max_mqtt_interval_rtd: "3600000" #1h
+  
+  min_mqtt_interval_combined: "6000" # 1s
+  initial_mqtt_interval_combined: "6000" # 1s
+  max_mqtt_interval_combined: "3600000" #1h
+
   mqtt_rtd_enabled: "true"
   mqtt_ec_enabled: "true"
   mqtt_ph_enabled: "true"
+  mqtt_combined_enabled: "true"
   
   mqtt_entities_internal: "false"
   

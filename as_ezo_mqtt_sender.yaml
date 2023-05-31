@@ -25,7 +25,7 @@ number:
     optimistic: true
     mode: box
     restore_value : true
-    initial_value: ${min_mqtt_interval_combined}
+    initial_value: ${initial_mqtt_interval_combined}
     update_interval: "10s"
     unit_of_measurement: "ms"
     internal: ${mqtt_entities_internal}

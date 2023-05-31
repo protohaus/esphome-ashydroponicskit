@@ -55,6 +55,10 @@ sensor:
     unit_of_measurement: "pH"
     update_interval: 0.1s
     internal: ${entities_internal}
+    filters:
+    - sliding_window_moving_average:
+        window_size: ${sliding_window_size_ph}
+        send_every: ${sliding_window_send_every_ph}
     
 globals:
 
